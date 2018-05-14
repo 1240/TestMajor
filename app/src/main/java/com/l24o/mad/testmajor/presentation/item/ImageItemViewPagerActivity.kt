@@ -3,7 +3,6 @@ package com.l24o.mad.testmajor.presentation.item
 import android.annotation.TargetApi
 import android.app.Activity
 import android.content.Intent
-import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.SharedElementCallback
@@ -12,6 +11,7 @@ import android.support.v4.view.ViewPager
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import android.widget.FrameLayout
 import android.widget.ImageView
 import com.arellomobile.mvp.MvpAppCompatActivity
 import com.bumptech.glide.Glide
@@ -30,31 +30,9 @@ class ImageItemViewPagerActivity : MvpAppCompatActivity() {
         const val EXTRA_EXIT_POSITION = "EXTRA_EXIT_POSITION"
     }
 
-    private var colorDrawable: ColorDrawable? = null
-    private val ALPHA_MAX = 0xFF
     private val items: ArrayList<ImageItem> by extras(EXTRA_ITEMS)
     private val adapterPosition: Int by extras(EXTRA_POSITION)
     private val current: Int by extras(EXTRA_CURRENT)
-
-    private val onDismissListener = object : DismissFrameLayout.OnDismissListener {
-        override fun onScaleProgress(scale: Float) {
-            colorDrawable?.alpha = Math.min(ALPHA_MAX, (colorDrawable?.alpha
-                    ?: ALPHA_MAX) - (scale * ALPHA_MAX).toInt())
-        }
-
-        override fun onDismiss() {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                finishAfterTransition()
-            } else {
-                finish()
-            }
-        }
-
-        override fun onCancel() {
-            colorDrawable?.alpha = ALPHA_MAX
-        }
-    }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,19 +44,29 @@ class ImageItemViewPagerActivity : MvpAppCompatActivity() {
     }
 
     private fun initViews() {
-        viewPager.adapter = PhotoAdapter(items, onDismissListener)
-        viewPager.currentItem = current
+        supportActionBar?.title = items[current].title
+        with(viewPager) {
+            adapter = PhotoAdapter(items)
+
+            clearOnPageChangeListeners()
+            addOnPageChangeListener(object : SimpleOnPageChangeListener {
+                override fun onPageSelected(position: Int) {
+                    supportActionBar?.title = items[position].title
+                }
+
+            })
+            currentItem = current
+        }
     }
 
 
     override fun finishAfterTransition() {
-        val pos = viewPager.currentItem
+        val position = viewPager.currentItem
         val intent = Intent()
-                .putExtra(EXTRA_EXIT_POSITION, pos)
+                .putExtra(EXTRA_EXIT_POSITION, position)
         setResult(Activity.RESULT_OK, intent)
-        if (current != pos) {
-            val view = viewPager.findViewWithTag<View>(
-                    getString(R.string.transition_name, adapterPosition, pos))
+        if (current != position) {
+            val view = viewPager.findViewWithTag<View>("transition_name:$position")
             setSharedElementCallback(view)
         }
         super.finishAfterTransition()
@@ -109,39 +97,34 @@ class ImageItemViewPagerActivity : MvpAppCompatActivity() {
     }
 
     inner class PhotoAdapter(
-            private var items: List<ImageItem>,
-            private var onDismissListener: DismissFrameLayout.OnDismissListener
+            private var items: List<ImageItem>
     ) : PagerAdapter() {
 
-        override fun getCount(): Int {
-            return items.size
-        }
+        override fun getCount() = items.size
 
-        override fun isViewFromObject(view: View, obj: Any): Boolean {
-            return view == obj
-        }
+        override fun isViewFromObject(view: View, obj: Any) = view == obj
+
+        override fun getPageTitle(position: Int) = items[position].title
 
         override fun instantiateItem(container: ViewGroup, position: Int): Any {
             val imageView = ImageView(container.context)
             imageView.layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
             imageView.scaleType = ImageView.ScaleType.FIT_CENTER
-            val layout = DismissFrameLayout(container.context)
-            layout.setDismissListener(onDismissListener)
+            val layout = FrameLayout(container.context)
             layout.layoutParams = ViewPager.LayoutParams()
             layout.addView(imageView)
             Glide.clear(imageView)
             Glide.with(container.context)
                     .load(items[position].imageUrl)
+                    .asBitmap()
                     .dontAnimate()
-                    .placeholder(R.drawable.ic_image_black_48dp)
-                    .error(R.drawable.ic_broken_image_black_48dp)
+                    .error(R.drawable.ic_image_black_48dp)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .into(imageView)
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                val name = container.context
-                        .getString(R.string.transition_name, adapterPosition, position)
+                val name = "transition_name:$position"
                 imageView.transitionName = name
                 imageView.tag = name
                 if (position == current) {

@@ -28,25 +28,20 @@ class MainPresenter : MvpPresenter<MainView>() {
                 })
     }
 
-    private fun onItemClicked(item: ImageListItem, posititon: Int) {
+    private fun onItemClicked(item: ImageListItem, position: Int) {
         item.image?.let { image ->
             ImagesUseCase.setViews(items.mapNotNull { it.image })
-            ImagesUseCase.enterPosition = posititon
+            ImagesUseCase.enterPosition = position
             viewState.navigateToImage(
                     items = items,
-                    position = posititon,
-                    image = image)
+                    position = position,
+                    image = image
+            )
             viewState.setCallback(
-                    exitPosition = ImagesUseCase.exitPosition,
                     enterPosition = ImagesUseCase.enterPosition,
                     sharedViews = ImagesUseCase.sharedViews
             )
         }
-    }
-
-    fun onItemExit(exitPosition: Int) {
-        ImagesUseCase.exitPosition = exitPosition
-
     }
 
     fun onMapSharedElements() {

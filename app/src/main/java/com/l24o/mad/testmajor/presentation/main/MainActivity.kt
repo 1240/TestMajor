@@ -20,6 +20,8 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : MvpAppCompatActivity(), MainView {
 
+    private var exitPosition: Int = 0
+
     @InjectPresenter
     lateinit var presenter: MainPresenter
 
@@ -64,11 +66,11 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     override fun onActivityReenter(resultCode: Int, data: Intent?) {
         super.onActivityReenter(resultCode, data)
         if (resultCode == Activity.RESULT_OK && data != null) {
-            presenter.onItemExit(data.getIntExtra(ImageItemViewPagerActivity.EXTRA_EXIT_POSITION, 0))
+            exitPosition = data.getIntExtra(ImageItemViewPagerActivity.EXTRA_EXIT_POSITION, 0)
         }
     }
 
-    override fun setCallback(exitPosition: Int, enterPosition: Int, sharedViews: List<View>) {
+    override fun setCallback(enterPosition: Int, sharedViews: List<View>) {
         setExitSharedElementCallback(object : SharedElementCallback() {
             override fun onMapSharedElements(names: MutableList<String>?, sharedElements: MutableMap<String, View>?) {
                 if (exitPosition != enterPosition &&

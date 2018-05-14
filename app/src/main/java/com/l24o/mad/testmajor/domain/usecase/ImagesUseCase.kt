@@ -6,7 +6,6 @@ import com.l24o.mad.testmajor.data.repository.ImagesRepository
 object ImagesUseCase {
 
 
-    var exitPosition: Int = 0
     var enterPosition: Int = 0
     var sharedViews = mutableListOf<View>()
 

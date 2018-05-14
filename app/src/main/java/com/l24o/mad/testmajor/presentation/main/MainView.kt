@@ -22,5 +22,5 @@ interface MainView : MvpView {
     fun showError(errorText: String)
 
     @StateStrategyType(OneExecutionStateStrategy::class)
-    fun setCallback(exitPosition: Int, enterPosition: Int, sharedViews: List<View>)
+    fun setCallback(enterPosition: Int, sharedViews: List<View>)
 }

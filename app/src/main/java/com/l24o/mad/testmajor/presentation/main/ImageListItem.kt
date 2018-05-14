@@ -19,16 +19,15 @@ class ImageListItem(
 
     override fun bind(viewHolder: ViewHolder, position: Int) {
         with(viewHolder.itemView) {
-//            li_main_image_thumbnail.tag = position
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                li_main_image_thumbnail?.transitionName = context.getString(R.string.transition_name, position, position)
+                li_main_image_thumbnail?.transitionName = "transition_name:$position"
             }
             Glide.clear(li_main_image_thumbnail)
             Glide.with(context)
                     .load(imageItem.imageUrl)
                     .dontAnimate()
                     .placeholder(R.drawable.ic_image_black_48dp)
-                    .error(R.drawable.ic_broken_image_black_48dp)
+                    .error(R.drawable.ic_image_black_48dp)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .into(li_main_image_thumbnail)
             li_main_image_title.text = imageItem.title
