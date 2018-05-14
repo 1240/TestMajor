@@ -6,12 +6,15 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.SharedElementCallback
-import android.support.v7.widget.StaggeredGridLayoutManager
+import android.support.v4.content.ContextCompat
+import android.support.v7.widget.LinearLayoutManager
 import android.view.View
 import android.widget.ImageView
+import android.widget.Toast
 import com.arellomobile.mvp.MvpAppCompatActivity
 import com.arellomobile.mvp.presenter.InjectPresenter
 import com.l24o.mad.testmajor.R
+import com.l24o.mad.testmajor.extension.makeVisibleOrGone
 import com.l24o.mad.testmajor.presentation.item.ImageItemViewPagerActivity
 import com.xwray.groupie.Group
 import com.xwray.groupie.GroupAdapter
@@ -28,14 +31,21 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     private val adapter = GroupAdapter<ViewHolder>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(R.style.AppTheme)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initViews()
     }
 
     private fun initViews() {
+        with(swipe_refresh_layout) {
+            setOnRefreshListener {
+                presenter.refresh()
+            }
+            setColorSchemeColors(ContextCompat.getColor(this@MainActivity, R.color.colorPrimary))
+        }
         recycler_view.adapter = adapter
-        recycler_view.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+        recycler_view.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         recycler_view.setHasFixedSize(true)
     }
 
@@ -45,12 +55,16 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     }
 
     override fun setLoadingVisible(isVisible: Boolean) {
+        if (!swipe_refresh_layout.isRefreshing) {
+            progress_bar_container.makeVisibleOrGone(isVisible)
+        } else {
+            swipe_refresh_layout.isRefreshing = isVisible
+        }
     }
 
     override fun navigateToImage(items: List<ImageListItem>, position: Int, image: ImageView) {
         val intent = Intent(this, ImageItemViewPagerActivity::class.java)
                 .putParcelableArrayListExtra(ImageItemViewPagerActivity.EXTRA_ITEMS, ArrayList(items.map { it.imageItem }))
-                .putExtra(ImageItemViewPagerActivity.EXTRA_POSITION, position)
                 .putExtra(ImageItemViewPagerActivity.EXTRA_CURRENT, position)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val options = ActivityOptions.makeSceneTransitionAnimation(this, image, image.transitionName)
@@ -61,6 +75,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     }
 
     override fun showError(errorText: String) {
+        Toast.makeText(this, errorText, Toast.LENGTH_SHORT).show()
     }
 
     override fun onActivityReenter(resultCode: Int, data: Intent?) {

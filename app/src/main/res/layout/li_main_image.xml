@@ -15,16 +15,15 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="?attr/selectableItemBackgroundBorderless">
 
             <ImageView
                 android:id="@+id/li_main_image_thumbnail"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="100dp"
                 android:adjustViewBounds="true"
-                android:minHeight="100dp"
-                android:scaleType="fitCenter"
+                android:scaleType="centerCrop"
                 android:src="@drawable/ic_image_black_48dp"
                 tools:ignore="ContentDescription" />
 
@@ -35,7 +34,7 @@
                 android:layout_below="@id/li_main_image_thumbnail"
                 android:background="@color/colorPrimary"
                 android:padding="@dimen/album_title_padding"
-                android:textColor="@color/colorAlbumTitle"
+                android:textColor="@color/colorTextWhite"
                 android:textSize="@dimen/album_title"
                 tools:text="TITLE" />
 

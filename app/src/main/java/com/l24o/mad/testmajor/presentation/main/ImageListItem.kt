@@ -25,6 +25,7 @@ class ImageListItem(
             Glide.clear(li_main_image_thumbnail)
             Glide.with(context)
                     .load(imageItem.imageUrl)
+                    .asBitmap()
                     .dontAnimate()
                     .placeholder(R.drawable.ic_image_black_48dp)
                     .error(R.drawable.ic_image_black_48dp)

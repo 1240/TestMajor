@@ -4,6 +4,7 @@ import com.arellomobile.mvp.InjectViewState
 import com.arellomobile.mvp.MvpPresenter
 import com.l24o.mad.testmajor.domain.usecase.ImagesUseCase
 import com.l24o.mad.testmajor.extension.schedulersIoToMain
+import com.l24o.mad.testmajor.utils.ErrorHandler
 
 @InjectViewState
 class MainPresenter : MvpPresenter<MainView>() {
@@ -12,6 +13,10 @@ class MainPresenter : MvpPresenter<MainView>() {
 
     init {
         viewState.setLoadingVisible(true)
+        fetch()
+    }
+
+    private fun fetch() {
         ImagesUseCase.getImages()
                 .map { images ->
                     images.map { ImageListItem(it, ::onItemClicked) }
@@ -24,8 +29,17 @@ class MainPresenter : MvpPresenter<MainView>() {
                     viewState.showImages(items)
                 }, {
                     viewState.setLoadingVisible(false)
-                    viewState.showError(it.localizedMessage)
+                    processError(it)
                 })
+    }
+
+    private fun processError(error: Throwable) {
+        ErrorHandler.processError(
+                throwable = error,
+                onErrorText = { errorText ->
+                    viewState.showError(errorText)
+                }
+        )
     }
 
     private fun onItemClicked(item: ImageListItem, position: Int) {
@@ -46,6 +60,10 @@ class MainPresenter : MvpPresenter<MainView>() {
 
     fun onMapSharedElements() {
         ImagesUseCase.sharedViews.clear()
+    }
+
+    fun refresh() {
+        fetch()
     }
 
 }

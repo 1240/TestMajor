@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">TestMajor</string>
+
+    <string name="error_convert_exception">Не удалось разобрать ответ сервера</string>
+    <string name="error_no_internet">Интернет-соединение отсутствует, попробуйте еще раз</string>
+    <string name="error_unknown">Операция временно недоступна. Попробуйте повторить позже.</string>
 </resources>
